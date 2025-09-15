@@ -1,0 +1,33 @@
+name: Daily Remote Job Alerts
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # every hour at minute 0 UTC
+  workflow_dispatch: {}
+
+jobs:
+  job-alert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Run job alert
+        env:
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
+          KEYWORDS: ${{ secrets.KEYWORDS }}
+          REMOTEOK_API: ${{ secrets.REMOTEOK_API }}
+          TIMEZONE: "America/Chicago"
+          TARGET_HOUR: "12"
+        run: python job_alert.py
